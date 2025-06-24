@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UGC NET Paper 1 - High-Weightage Units & Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Slate Gray, Sky Blue, and Amber -->
+    <!-- Application Structure Plan:
+        The application is structured as a single-page interactive dashboard.
+        1. Header: A clean title to set the context.
+        2. Overview Section: An immediate, high-level summary with a bar chart visualizing the question distribution per unit. This gives a quick understanding of which units are most prominent. Key takeaways are highlighted in distinct cards. This design choice prioritizes instant insight.
+        3. Detailed Unit Breakdown: A grid of clickable buttons, one for each unit. Clicking a button dynamically displays the detailed topics for that unit in a dedicated content area below. This interactive approach avoids overwhelming the user with all information at once and allows for focused exploration. The active unit is highlighted to maintain user orientation.
+        4. Strategic Insights Section: This section provides qualitative analysis and actionable advice derived from the report, such as the shift towards application-based questions and tips for tackling specific sections.
+        This structure guides the user from a broad overview to specific details in a logical and intuitive manner, enhancing comprehension and usability.
+    -->
+    <!-- Visualization & Content Choices:
+        - Bar Chart (Chart.js): Chosen to clearly compare the question distribution across all 10 units. It's more effective than a pie chart for comparing discrete categories. The interaction involves tooltips on hover to show exact question counts.
+        - Dynamic Content Panels (HTML/CSS/JS): Used for the detailed breakdown of each unit. This keeps the interface clean and interactive. When a user clicks a unit button, the corresponding information (key topics, question patterns) is displayed. This is more engaging than a long, static list.
+        - Information Cards (HTML/Tailwind): Used in the "Strategic Insights" section to present key takeaways in a digestible, visually separated format, making them easy to scan and remember.
+        - All content is taken directly from the provided report, re-organized for better digital consumption.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* light gray */
+            color: #1f2937; /* dark gray */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-unit {
+            background-color: #e2e8f0;
+            color: #475569;
+            transition: all 0.2s;
+        }
+        .btn-unit.active {
+            background-color: #3b82f6; /* Blue-600 */
+            color: white;
+            font-weight: 600;
+        }
+        .btn-unit:hover {
+            background-color: #cbd5e1;
+        }
+         .btn-unit.active:hover {
+            background-color: #2563eb; /* Darker Blue */
+        }
+
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-800">UGC NET Paper 1: High-Weightage Units</h1>
+            <p class="text-lg text-slate-600 mt-2">An Interactive Analysis of Exam Trends (2020-2024)</p>
+        </header>
+
+        <!-- Main Dashboard Section -->
+        <section id="dashboard" class="mb-12">
+            <h2 class="text-2xl font-semibold mb-4 text-slate-700 border-b-2 border-blue-500 pb-2">At a Glance: Key Insights</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="card">
+                    <h3 class="text-xl font-bold mb-3 text-blue-700">Question Distribution per Unit</h3>
+                    <p class="text-slate-600 mb-4 text-sm">This chart shows the typical number of questions from each of the 10 units in UGC NET Paper 1, based on an analysis of recent exams. While most units have 5 questions, some show slight variations.</p>
+                    <div class="chart-container" style="position: relative; height:40vh; width:100%">
+                        <canvas id="questionsChart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="card bg-blue-50 border-l-4 border-blue-500">
+                        <h4 class="font-bold text-lg text-blue-800">Core Focus Areas</h4>
+                        <p class="text-slate-700 mt-1">Teaching Aptitude and Research Aptitude consistently form the core of the exam, testing foundational academic skills.</p>
+                    </div>
+                    <div class="card bg-amber-50 border-l-4 border-amber-500">
+                        <h4 class="font-bold text-lg text-amber-800">High-Scoring & Factual Units</h4>
+                        <p class="text-slate-700 mt-1">People & Environment and Higher Education are often more direct and factual, offering a good opportunity to secure marks with thorough preparation.</p>
+                    </div>
+                    <div class="card bg-rose-50 border-l-4 border-rose-500">
+                        <h4 class="font-bold text-lg text-rose-800">Challenging & Time-Consuming</h4>
+                        <p class="text-slate-700 mt-1">Be prepared for Logical Reasoning and Data Interpretation. These sections require strong analytical skills and efficient time management.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Unit Breakdown -->
+        <section id="unit-details" class="mb-12">
+            <h2 class="text-2xl font-semibold mb-4 text-slate-700 border-b-2 border-blue-500 pb-2">Explore Units in Detail</h2>
+            <p class="text-slate-600 mb-6">Click on a unit to see the key topics and question patterns associated with it.</p>
+            
+            <div id="unit-buttons" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6">
+                <!-- Buttons will be dynamically generated here -->
+            </div>
+            
+            <div id="unit-content" class="card bg-white min-h-[300px] p-6 transition-all duration-300">
+                <!-- Content will be injected here by JavaScript -->
+                <p class="text-slate-500 text-center pt-20">Select a unit above to view its details.</p>
+            </div>
+        </section>
+
+        <!-- Strategic Preparation -->
+        <section id="strategy">
+            <h2 class="text-2xl font-semibold mb-4 text-slate-700 border-b-2 border-blue-500 pb-2">Strategic Preparation Guide</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="text-lg font-bold text-blue-700 mb-2">Focus on Application</h3>
+                    <p class="text-slate-600">Move beyond rote learning. The trend is towards questions that require you to apply concepts to given scenarios, especially in Teaching and Research Aptitude.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-bold text-blue-700 mb-2">Master Data Interpretation & Logic</h3>
+                    <p class="text-slate-600">These sections are consistently reported as time-consuming. Regular practice with varied problems is key to improving both your speed and accuracy.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-bold text-blue-700 mb-2">Stay Updated on ICT & Education</h3>
+                    <p class="text-slate-600">Be familiar with the latest digital initiatives in Indian higher education (like SWAYAM, NDL) and the key recommendations of the National Education Policy (NEP) 2020.</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-bold text-blue-700 mb-2">Practice with Past Papers</h3>
+                    <p class="text-slate-600">Solving previous years' question papers is the best way to understand the exam pattern, question types, and manage your time effectively under exam conditions.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center mt-12 text-slate-500 text-sm">
+            <p>Data analyzed from UGC NET Paper 1 trends (2020-2024). This interactive summary is for educational purposes.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const unitsData = [
+                {
+                    name: "Teaching Aptitude",
+                    content: `
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Unit 1: Teaching Aptitude</h3>
+                        <p class="text-gray-600 mb-4"><strong>Key Topics:</strong> Concept, Objectives, Levels of Teaching (Memory, Understanding, Reflective); Learner’s Characteristics; Factors affecting Teaching; Methods of Teaching in Institutions of Higher Learning (Teacher-centred vs. Learner-centred, Online vs. Offline, SWAYAM, MOOCs); Teaching Support System; and Evaluation Systems (Formative, Summative, CBCS, Computer-based testing).</p>
+                        <p class="text-gray-600"><strong>Question Pattern:</strong> Expect scenario-based and application-oriented questions. You might be asked to identify the most appropriate teaching method for a given context or analyze the characteristics of different learners.</p>
+                    `
+                },
+                {
+                    name: "Research Aptitude",
+                    content: `
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Unit 2: Research Aptitude</h3>
+                        <p class="text-gray-600 mb-4"><strong>Key Topics:</strong> Meaning, Types, and Characteristics of Research; Positivism and Post-positivistic approaches; Methods of Research (Experimental, Descriptive, Historical, Qualitative, and Quantitative); Steps of research; Thesis and Article writing (Format and styles of referencing); Application of ICT in research; and Research ethics.</p>
+                        <p class="text-gray-600"><strong>Question Pattern:</strong> Questions often test your understanding of research terminology, methodology, and ethical considerations. Be prepared for questions on different research designs and sampling techniques.</p>
+                    `
+                },
+                {
+                    name: "Reading Comprehension",
+                    content: `
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Unit 3: Comprehension</h3>
+                        <p class="text-gray-600 mb-4"><strong>Key Topics:</strong> A passage of text with questions to be answered. The focus is on your ability to understand, analyze, and interpret the given text.</p>
+                        <p class="text-gray-600"><strong>Question Pattern:</strong> A set of 5 questions is always asked from a single passage. Questions will test your ability to identify the main idea, infer meaning, and understand the author's tone and perspective.</p>
+                    `
+                },
+                {
+                    name: "Communication",
+                    content: `
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Unit 4: Communication</h3>
+                        <p class="text-gray-600 mb-4"><strong>Key Topics:</strong> Meaning, types and characteristics of communication; Effective communication (Verbal and Non-verbal, Inter-Cultural and group communications, Classroom communication); Barriers to effective communication; Mass-Media and Society.</p>
+                        <p class="text-gray-600"><strong>Question Pattern:</strong> Questions are often based on models of communication, types of communication, and barriers. You may be asked to identify the type of communication in a given scenario.</p>
+                    `
+                },
+                {
+                    name: "Mathematical Reasoning",
+                    content: `
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Unit 5: Mathematical Reasoning & Aptitude</h3>
+                        <p class="text-gray-600 mb-4"><strong>Key Topics:</strong> Types of reasoning; Number series, Letter series, Codes, and Relationships; Mathematical Aptitude (Fraction, Time & Distance, Ratio, Proportion and Percentage, Profit and Loss, Interest and Discounting, Averages, etc.).</p>
+                        <p class="text-gray-600"><strong>Question Pattern:</strong> This section tests your problem-solving skills with questions on series completion, coding-decoding, and basic mathematical calculations. Speed and accuracy are key.</p>
+                    `
+                },
+                {
+                    name: "Logical Reasoning",
+                    content: `
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Unit 6: Logical Reasoning</h3>
+                        <p class="text-gray-600 mb-4"><strong>Key Topics:</strong> Understanding the structure of arguments; Evaluating and distinguishing deductive and inductive reasoning; Analogies; Venn diagram; Indian Logic: Means of knowledge; Pramanas (Perception, Inference, Comparison, Verbal testimony, etc.); Structure and kinds of Anumana (inference).</p>
+                        <p class="text-gray-600"><strong>Question Pattern:</strong> This is a high-scoring but potentially tricky section. Questions on syllogisms, fallacies, and the Square of Opposition are very common. Indian logic is a recurring theme.</p>
+                    `
+                },
+                {
+                    name: "Data Interpretation",
+                    content: `
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Unit 7: Data Interpretation</h3>
+                        <p class="text-gray-600 mb-4"><strong>Key Topics:</strong> Sources, acquisition, and classification of Data; Quantitative and Qualitative Data; Graphical representation (Bar-chart, Histograms, Pie-chart, Table-chart, and Line-chart) and mapping of Data.</p>
+                        <p class="text-gray-600"><strong>Question Pattern:</strong> A set of 5 questions based on a single data set (table, pie chart, or bar graph). Requires calculation of percentages, ratios, and averages. Can be time-consuming.</p>
+                    `
+                },
+                {
+                    name: "ICT",
+                    content: `
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Unit 8: Information and Communication Technology (ICT)</h3>
+                        <p class="text-gray-600 mb-4"><strong>Key Topics:</strong> ICT: General abbreviations and terminology; Basics of the Internet, Intranet, E-mail, Audio and Video-conferencing; Digital initiatives in higher education; ICT and Governance.</p>
+                        <p class="text-gray-600"><strong>Question Pattern:</strong> Questions range from basic computer terminology (e.g., RAM, ROM, CPU) to recent government digital initiatives. A mix of factual and conceptual questions.</p>
+                    `
+                },
+                {
+                    name: "People, Development & Environment",
+                    content: `
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Unit 9: People, Development and Environment</h3>
+                        <p class="text-gray-600 mb-4"><strong>Key Topics:</strong> Development and environment: Millennium Development and Sustainable Development Goals; Human and environment interaction; Environmental issues (local, regional and global); Air pollution, Water pollution, Soil pollution, Noise pollution, Waste, Climate change and its socio-economic and political dimensions; Natural and energy resources; Natural hazards and disasters.</p>
+                        <p class="text-gray-600"><strong>Question Pattern:</strong> Often focuses on current environmental issues, international agreements (Kyoto Protocol, Paris Agreement), and types of pollutants and their sources.</p>
+                    `
+                },
+                {
+                    name: "Higher Education System",
+                    content: `
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Unit 10: Higher Education System</h3>
+                        <p class="text-gray-600 mb-4"><strong>Key Topics:</strong> Institutions of higher learning and education in ancient India; Evolution of higher learning and research in Post-Independence India; Oriental, Conventional and Non-conventional learning programmes in India; Professional, Technical and Skill-Based education; Value education and environmental education; Policies, Governance, and Administration.</p>
+                        <p class="text-gray-600"><strong>Question Pattern:</strong> Questions often relate to regulatory bodies (UGC, AICTE), educational commissions (Kothari, Radhakrishnan), and the structure of higher education in India.</p>
+                    `
+                }
+            ];
+
+            const buttonsContainer = document.getElementById('unit-buttons');
+            const contentContainer = document.getElementById('unit-content');
+            let lastActiveButton = null;
+
+            unitsData.forEach((unit, index) => {
+                const button = document.createElement('button');
+                button.className = 'btn-unit p-3 rounded-lg font-semibold text-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
+                button.textContent = unit.name;
+                button.dataset.index = index;
+                buttonsContainer.appendChild(button);
+            });
+
+            buttonsContainer.addEventListener('click', (event) => {
+                const button = event.target.closest('button');
+                if (!button) return;
+
+                if (lastActiveButton) {
+                    lastActiveButton.classList.remove('active');
+                }
+
+                button.classList.add('active');
+                lastActiveButton = button;
+                
+                const unitIndex = button.dataset.index;
+                contentContainer.innerHTML = unitsData[unitIndex].content;
+            });
+
+            const ctx = document.getElementById('questionsChart').getContext('2d');
+            const questionsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'Teaching Aptitude', 
+                        'Research Aptitude', 
+                        'Reading Comp.', 
+                        'Communication', 
+                        'Mathematical Reasoning', 
+                        'Logical Reasoning', 
+                        'Data Interpretation', 
+                        'ICT', 
+                        'People, Env.', 
+                        'Higher Education'
+                    ],
+                    datasets: [{
+                        label: 'Typical No. of Questions',
+                        data: [5.5, 5.5, 5, 5, 4, 5.5, 5, 4.5, 4.5, 4.5], // Using averages for representation
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(75, 192, 192, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            title: {
+                                display: true,
+                                text: 'Number of Questions'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
